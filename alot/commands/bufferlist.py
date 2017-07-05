@@ -2,14 +2,15 @@
 # This file is released under the GNU GPL, version 3 or a later revision.
 # For further details see the COPYING file
 from __future__ import absolute_import
+from functools import partial
 
 from ..commands import Command, registerCommand
 from . import globals
 
-MODE = 'bufferlist'
+register = partial(registerCommand, 'bufferlist')
 
 
-@registerCommand(MODE, 'open')
+@register('open')
 class BufferFocusCommand(Command):
     """focus selected buffer"""
     def apply(self, ui):
@@ -17,7 +18,7 @@ class BufferFocusCommand(Command):
         ui.buffer_focus(selected)
 
 
-@registerCommand(MODE, 'close')
+@register('close')
 class BufferCloseCommand(Command):
     """close focussed buffer"""
     def apply(self, ui):

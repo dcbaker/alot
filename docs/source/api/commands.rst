@@ -19,15 +19,20 @@ to a global command pool using the :class:`registerCommand` decorator.
 
 .. note::
 
+    We use helper functions in the command modules to reduce the biolerplate of
+    registering a command. :func:`register`, is a `functools.partial` instance
+    that has :class:`~alot.commands.registerCommnad`, and the mode prepoulated
+    for it's arguments.
+
+.. note::
+
     The names of the commands available to the user in any given mode do not correspond
     one-to-one to these subclasses. You can register a Command multiple times under different
     names, with different forced constructor parameters and so on. See for instance the
     definition of BufferFocusCommand in 'commands/globals.py'::
 
-        @registerCommand(MODE, 'bprevious', forced={'offset': -1},
-                         help='focus previous buffer')
-        @registerCommand(MODE, 'bnext', forced={'offset': +1},
-                         help='focus next buffer')
+        @register('bprevious', forced={'offset': -1}, help='focus previous buffer')
+        @register('bnext', forced={'offset': +1}, help='focus next buffer')
         class BufferFocusCommand(Command):
             def __init__(self, buffer=None, offset=0, **kwargs):
             ...

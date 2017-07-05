@@ -4,6 +4,8 @@
 from __future__ import absolute_import
 from __future__ import division
 
+from functools import partial
+from StringIO import StringIO
 import argparse
 import code
 import email
@@ -12,7 +14,6 @@ import glob
 import logging
 import os
 import subprocess
-from StringIO import StringIO
 
 import urwid
 from twisted.internet.defer import inlineCallbacks
@@ -37,10 +38,10 @@ from ..db.envelope import Envelope
 from ..settings import settings
 from ..utils import argparse as cargparse
 
-MODE = 'global'
+register = partial(registerCommand, 'global')
 
 
-@registerCommand(MODE, 'exit')
+@register('exit')
 class ExitCommand(Command):
     """Shut down cleanly.
 
@@ -83,7 +84,7 @@ class ExitCommand(Command):
             ui.exit()
 
 
-@registerCommand(MODE, 'search', usage='search query', arguments=[
+@register('search', usage='search query', arguments=[
     (['--sort'], {'help': 'sort order', 'choices': [
         'oldest_first', 'newest_first', 'message_id', 'unsorted']}),
     (['query'], {'nargs': argparse.REMAINDER, 'help': 'search string'})])
@@ -127,7 +128,7 @@ class SearchCommand(Command):
             ui.notify('empty query string')
 
 
-@registerCommand(MODE, 'prompt', arguments=[
+@register('prompt', arguments=[
     (['startwith'], {'nargs': '?', 'default': '', 'help': 'initial content'})])
 class PromptCommand(Command):
 
@@ -161,7 +162,7 @@ class PromptCommand(Command):
             raise CommandCanceled()
 
 
-@registerCommand(MODE, 'refresh')
+@register('refresh')
 class RefreshCommand(Command):
 
     """refresh the current buffer"""
@@ -172,8 +173,8 @@ class RefreshCommand(Command):
         ui.update()
 
 
-@registerCommand(
-    MODE, 'shellescape', arguments=[
+@register(
+    'shellescape', arguments=[
         (['--spawn'], {'action': cargparse.BooleanAction, 'default': None,
                        'help': 'run in terminal window'}),
         (['--thread'], {'action': cargparse.BooleanAction, 'default': None,
@@ -346,7 +347,7 @@ class EditCommand(ExternalCommand):
             return ExternalCommand.apply(self, ui)
 
 
-@registerCommand(MODE, 'pyshell')
+@register('pyshell')
 class PythonShellCommand(Command):
 
     """open an interactive python shell for introspection"""
@@ -358,7 +359,7 @@ class PythonShellCommand(Command):
         ui.mainloop.screen.start()
 
 
-@registerCommand(MODE, 'repeat')
+@register('repeat')
 class RepeatCommand(Command):
 
     """Repeats the command executed last time"""
@@ -372,7 +373,7 @@ class RepeatCommand(Command):
             ui.notify('no last command')
 
 
-@registerCommand(MODE, 'call', arguments=[
+@register('call', arguments=[
     (['command'], {'help': 'python command string to call'})])
 class CallCommand(Command):
 
@@ -403,7 +404,7 @@ class CallCommand(Command):
             ui.notify(msg % (self.command, e), priority='error')
 
 
-@registerCommand(MODE, 'bclose', arguments=[
+@register('bclose', arguments=[
     (['--redraw'],
      {'action': cargparse.BooleanAction,
       'help': 'redraw current buffer after command has finished'}),
@@ -470,12 +471,10 @@ class BufferCloseCommand(Command):
             ui.buffer_close(self.buffer, self.redraw)
 
 
-@registerCommand(MODE, 'bprevious', forced={'offset': -1},
-                 help='focus previous buffer')
-@registerCommand(MODE, 'bnext', forced={'offset': +1},
-                 help='focus next buffer')
-@registerCommand(
-    MODE, 'buffer',
+@register('bprevious', forced={'offset': -1}, help='focus previous buffer')
+@register('bnext', forced={'offset': +1}, help='focus next buffer')
+@register(
+    'buffer',
     arguments=[(['index'], {'type': int, 'help': 'buffer index to focus'})],
     help='focus buffer with given index')
 class BufferFocusCommand(Command):
@@ -514,7 +513,7 @@ class BufferFocusCommand(Command):
         ui.buffer_focus(self.buffer)
 
 
-@registerCommand(MODE, 'bufferlist')
+@register('bufferlist')
 class OpenBufferlistCommand(Command):
 
     """open a list of active buffers"""
@@ -535,7 +534,7 @@ class OpenBufferlistCommand(Command):
             ui.buffer_open(bl)
 
 
-@registerCommand(MODE, 'taglist', arguments=[
+@register('taglist', arguments=[
     (['--tags'], {'nargs': '+', 'help': 'tags to display'}),
 ])
 class TagListCommand(Command):
@@ -562,7 +561,7 @@ class TagListCommand(Command):
             ui.buffer_open(buffers.TagListBuffer(ui, tags, self.filtfun))
 
 
-@registerCommand(MODE, 'flush')
+@register('flush')
 class FlushCommand(Command):
 
     """flush write operations or retry until committed"""
@@ -606,7 +605,7 @@ class FlushCommand(Command):
 
 
 # TODO: choices
-@registerCommand(MODE, 'help', arguments=[
+@register('help', arguments=[
     (['commandname'], {'help': 'command or \'bindings\''})])
 class HelpCommand(Command):
 
@@ -676,7 +675,7 @@ class HelpCommand(Command):
                           priority='error')
 
 
-@registerCommand(MODE, 'compose', arguments=[
+@register('compose', arguments=[
     (['--sender'], {'nargs': '?', 'help': 'sender'}),
     (['--template'], {'nargs': '?',
                       'help': 'path to a template message file'}),
@@ -922,8 +921,8 @@ class ComposeCommand(Command):
         ui.apply_command(cmd)
 
 
-@registerCommand(
-    MODE, 'move', help='move focus in current buffer',
+@register(
+    'move', help='move focus in current buffer',
     arguments=[
         (['movement'],
          {'nargs': argparse.REMAINDER,

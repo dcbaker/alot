@@ -2,14 +2,15 @@
 # This file is released under the GNU GPL, version 3 or a later revision.
 # For further details see the COPYING file
 from __future__ import absolute_import
+from functools import partial
 
 from . import Command, registerCommand
 from .globals import SearchCommand
 
-MODE = 'taglist'
+register = partial(registerCommand, 'taglist')
 
 
-@registerCommand(MODE, 'select')
+@register('select')
 class TaglistSelectCommand(Command):
 
     """search for messages with selected tag"""

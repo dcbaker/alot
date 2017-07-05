@@ -3,6 +3,7 @@
 # For further details see the COPYING file
 from __future__ import absolute_import
 
+from functools import partial
 import argparse
 import datetime
 import email
@@ -28,12 +29,11 @@ from ..helper import string_decode
 from ..settings import settings
 from ..utils import argparse as cargparse
 
+register = partial(registerCommand, 'envelope')
 
-MODE = 'envelope'
 
-
-@registerCommand(
-    MODE, 'attach',
+@register(
+    'attach',
     arguments=[(['path'], {'help': 'file(s) to attach (accepts wildcads)'})])
 class AttachCommand(Command):
     """attach files to the mail"""
@@ -62,7 +62,7 @@ class AttachCommand(Command):
         ui.current_buffer.rebuild()
 
 
-@registerCommand(MODE, 'unattach', arguments=[
+@register('unattach', arguments=[
     (['hint'], {'nargs': '?', 'help': 'which attached file to remove'}),
 ])
 class UnattachCommand(Command):
@@ -89,8 +89,7 @@ class UnattachCommand(Command):
         ui.current_buffer.rebuild()
 
 
-@registerCommand(MODE, 'refine', arguments=[
-    (['key'], {'help': 'header to refine'})])
+@register('refine', arguments=[(['key'], {'help': 'header to refine'})])
 class RefineCommand(Command):
     """prompt to change the value of a header"""
     def __init__(self, key='', **kwargs):
@@ -107,7 +106,7 @@ class RefineCommand(Command):
         ui.apply_command(globals.PromptCommand(cmdstring))
 
 
-@registerCommand(MODE, 'save')
+@register('save')
 class SaveCommand(Command):
     """save draft"""
     def apply(self, ui):
@@ -153,7 +152,7 @@ class SaveCommand(Command):
             ui.apply_command(commands.globals.BufferCloseCommand())
 
 
-@registerCommand(MODE, 'send')
+@register('send')
 class SendCommand(Command):
     """send mail"""
     def __init__(self, mail=None, envelope=None, **kwargs):
@@ -278,7 +277,7 @@ class SendCommand(Command):
         d.addErrback(store_errb)
 
 
-@registerCommand(MODE, 'edit', arguments=[
+@register('edit', arguments=[
     (['--spawn'], {'action': cargparse.BooleanAction, 'default': None,
                    'help': 'spawn editor in new terminal'}),
     (['--refocus'], {'action': cargparse.BooleanAction, 'default': True,
@@ -389,7 +388,7 @@ class EditCommand(Command):
         ui.apply_command(cmd)
 
 
-@registerCommand(MODE, 'set', arguments=[
+@register('set', arguments=[
     (['--append'], {'action': 'store_true', 'help': 'keep previous values'}),
     (['key'], {'help': 'header to refine'}),
     (['value'], {'nargs': '+', 'help': 'value'})])
@@ -416,7 +415,7 @@ class SetCommand(Command):
         ui.current_buffer.rebuild()
 
 
-@registerCommand(MODE, 'unset', arguments=[
+@register('unset', arguments=[
     (['key'], {'help': 'header to refine'})])
 class UnsetCommand(Command):
     """remove header field"""
@@ -433,7 +432,7 @@ class UnsetCommand(Command):
         ui.current_buffer.rebuild()
 
 
-@registerCommand(MODE, 'toggleheaders')
+@register('toggleheaders')
 class ToggleHeaderCommand(Command):
     """toggle display of all headers"""
     repeatable = True
@@ -442,16 +441,16 @@ class ToggleHeaderCommand(Command):
         ui.current_buffer.toggle_all_headers()
 
 
-@registerCommand(
-    MODE, 'sign', forced={'action': 'sign'},
+@register(
+    'sign', forced={'action': 'sign'},
     arguments=[
         (['keyid'],
          {'nargs': argparse.REMAINDER, 'help': 'which key id to use'})],
     help='mark mail to be signed before sending')
-@registerCommand(MODE, 'unsign', forced={'action': 'unsign'},
-                 help='mark mail not to be signed before sending')
-@registerCommand(
-    MODE, 'togglesign', forced={'action': 'toggle'}, arguments=[
+@register('unsign', forced={'action': 'unsign'},
+          help='mark mail not to be signed before sending')
+@register(
+    'togglesign', forced={'action': 'toggle'}, arguments=[
         (['keyid'],
          {'nargs': argparse.REMAINDER, 'help': 'which key id to use'})],
     help='toggle sign status')
@@ -501,26 +500,26 @@ class SignCommand(Command):
         ui.current_buffer.rebuild()
 
 
-@registerCommand(
-    MODE, 'encrypt', forced={'action': 'encrypt'}, arguments=[
+@register(
+    'encrypt', forced={'action': 'encrypt'}, arguments=[
         (['--trusted'], {'action': 'store_true',
                          'help': 'only add trusted keys'}),
         (['keyids'], {'nargs': argparse.REMAINDER,
                       'help': 'keyid of the key to encrypt with'})],
     help='request encryption of message before sendout')
-@registerCommand(
-    MODE, 'unencrypt', forced={'action': 'unencrypt'},
+@register(
+    'unencrypt', forced={'action': 'unencrypt'},
     help='remove request to encrypt message before sending')
-@registerCommand(
-    MODE, 'toggleencrypt', forced={'action': 'toggleencrypt'},
+@register(
+    'toggleencrypt', forced={'action': 'toggleencrypt'},
     arguments=[
         (['--trusted'], {'action': 'store_true',
                          'help': 'only add trusted keys'}),
         (['keyids'], {'nargs': argparse.REMAINDER,
                       'help': 'keyid of the key to encrypt with'})],
     help='toggle if message should be encrypted before sendout')
-@registerCommand(
-    MODE, 'rmencrypt', forced={'action': 'rmencrypt'},
+@register(
+    'rmencrypt', forced={'action': 'rmencrypt'},
     arguments=[
         (['keyids'], {'nargs': argparse.REMAINDER,
                       'help': 'keyid of the key to encrypt with'})],

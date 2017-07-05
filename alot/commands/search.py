@@ -3,6 +3,7 @@
 # For further details see the COPYING file
 from __future__ import absolute_import
 
+from functools import partial
 import argparse
 import logging
 
@@ -14,11 +15,10 @@ from .. import commands
 from .. import buffers
 from ..db.errors import DatabaseROError
 
+register = partial(registerCommand, 'search')
 
-MODE = 'search'
 
-
-@registerCommand(MODE, 'select')
+@register('select')
 class OpenThreadCommand(Command):
 
     """open thread in a new buffer"""
@@ -42,11 +42,11 @@ class OpenThreadCommand(Command):
             sb.unfold_matching(query)
 
 
-@registerCommand(MODE, 'refine', help='refine query', arguments=[
+@register('refine', help='refine query', arguments=[
     (['--sort'], {'help': 'sort order', 'choices': [
         'oldest_first', 'newest_first', 'message_id', 'unsorted']}),
     (['query'], {'nargs': argparse.REMAINDER, 'help': 'search string'})])
-@registerCommand(MODE, 'sort', help='set sort order', arguments=[
+@register('sort', help='set sort order', arguments=[
     (['sort'], {'help': 'sort order', 'choices': [
         'oldest_first', 'newest_first', 'message_id', 'unsorted']}),
 ])
@@ -81,7 +81,7 @@ class RefineCommand(Command):
             ui.notify('empty query string')
 
 
-@registerCommand(MODE, 'refineprompt')
+@register('refineprompt')
 class RefinePromptCommand(Command):
 
     """prompt to change this buffers querystring"""
@@ -93,7 +93,7 @@ class RefinePromptCommand(Command):
         return ui.apply_command(PromptCommand('refine ' + oldquery))
 
 
-@registerCommand(MODE, 'retagprompt')
+@register('retagprompt')
 class RetagPromptCommand(Command):
 
     """prompt to retag selected threads\' tags"""
@@ -112,8 +112,8 @@ class RetagPromptCommand(Command):
         return ui.apply_command(PromptCommand('retag ' + initial_tagstring))
 
 
-@registerCommand(
-    MODE, 'tag', forced={'action': 'add'},
+@register(
+    'tag', forced={'action': 'add'},
     arguments=[
         (['--no-flush'], {'action': 'store_false', 'dest': 'flush',
                           'default': 'True',
@@ -123,8 +123,8 @@ class RetagPromptCommand(Command):
         (['tags'], {'help': 'comma separated list of tags'})],
     help='add tags to all messages in the thread that match the current query',
 )
-@registerCommand(
-    MODE, 'retag', forced={'action': 'set'},
+@register(
+    'retag', forced={'action': 'set'},
     arguments=[
         (['--no-flush'], {'action': 'store_false', 'dest': 'flush',
                           'default': 'True',
@@ -134,8 +134,8 @@ class RetagPromptCommand(Command):
         (['tags'], {'help': 'comma separated list of tags'})],
     help='set tags of all messages in the thread that match the current query',
 )
-@registerCommand(
-    MODE, 'untag', forced={'action': 'remove'},
+@register(
+    'untag', forced={'action': 'remove'},
     arguments=[
         (['--no-flush'], {'action': 'store_false', 'dest': 'flush',
                           'default': 'True',
@@ -145,8 +145,8 @@ class RetagPromptCommand(Command):
         (['tags'], {'help': 'comma separated list of tags'})],
     help='remove tags from all messages in the thread that match the query',
 )
-@registerCommand(
-    MODE, 'toggletags', forced={'action': 'toggle'},
+@register(
+    'toggletags', forced={'action': 'toggle'},
     arguments=[
         (['--no-flush'], {'action': 'store_false', 'dest': 'flush',
                           'default': 'True',
@@ -250,8 +250,8 @@ class TagCommand(Command):
             ui.apply_command(commands.globals.FlushCommand(callback=refresh))
 
 
-@registerCommand(
-    MODE, 'move', help='move focus in search buffer',
+@register(
+    'move', help='move focus in search buffer',
     arguments=[(['movement'], {'nargs': argparse.REMAINDER, 'help': 'last'})])
 class MoveFocusCommand(MoveCommand):
 

@@ -10,11 +10,12 @@ import os
 import re
 import subprocess
 import tempfile
+from cStringIO import StringIO
 from email.utils import getaddresses, parseaddr, formataddr
 from email.message import Message
+from functools import partial
 
 from twisted.internet.defer import inlineCallbacks
-from cStringIO import StringIO
 
 from . import Command, registerCommand
 from .globals import ExternalCommand
@@ -38,7 +39,7 @@ from ..helper import email_as_string
 from ..utils import argparse as cargparse
 from ..widgets.globals import AttachmentWidget
 
-MODE = 'thread'
+register = partial(registerCommand, 'thread')
 
 
 def determine_sender(mail, action='reply'):
@@ -106,7 +107,7 @@ def determine_sender(mail, action='reply'):
     return from_value, account
 
 
-@registerCommand(MODE, 'reply', arguments=[
+@register('reply', arguments=[
     (['--all'], {'action': 'store_true', 'help': 'reply to all'}),
     (['--list'], {'action': cargparse.BooleanAction, 'default': None,
                   'dest': 'listreply', 'help': 'reply to list'}),
@@ -316,7 +317,7 @@ class ReplyCommand(Command):
         return sorted(urecipients)
 
 
-@registerCommand(MODE, 'forward', arguments=[
+@register('forward', arguments=[
     (['--attach'], {'action': 'store_true', 'help': 'attach original mail'}),
     (['--spawn'], {'action': cargparse.BooleanAction, 'default': None,
                    'help': 'open editor in new window'})])
@@ -404,7 +405,7 @@ class ForwardCommand(Command):
                                         spawn=self.force_spawn))
 
 
-@registerCommand(MODE, 'bounce')
+@register('bounce')
 class BounceMailCommand(Command):
 
     """directly re-send selected message"""
@@ -469,7 +470,7 @@ class BounceMailCommand(Command):
         ui.apply_command(SendCommand(mail=mail))
 
 
-@registerCommand(MODE, 'editnew', arguments=[
+@register('editnew', arguments=[
     (['--spawn'], {'action': cargparse.BooleanAction, 'default': None,
                    'help': 'open editor in new window'})])
 class EditNewCommand(Command):
@@ -511,28 +512,28 @@ class EditNewCommand(Command):
                                         omit_signature=True))
 
 
-@registerCommand(
-    MODE, 'fold', forced={'visible': False},
+@register(
+    'fold', forced={'visible': False},
     arguments=[
         (['query'], {'help': 'query used to filter messages to affect',
                      'nargs': '*'})
     ],
     help='fold message(s)')
-@registerCommand(MODE, 'unfold', forced={'visible': True}, arguments=[
+@register('unfold', forced={'visible': True}, arguments=[
     (['query'], {'help': 'query used to filter messages to affect',
                  'nargs': '*'}),
 ], help='unfold message(s)')
-@registerCommand(MODE, 'togglesource', forced={'raw': 'toggle'}, arguments=[
+@register('togglesource', forced={'raw': 'toggle'}, arguments=[
     (['query'], {'help': 'query used to filter messages to affect',
                  'nargs': '*'}),
 ], help='display message source')
-@registerCommand(MODE, 'toggleheaders', forced={'all_headers': 'toggle'},
-                 arguments=[
-                     (['query'], {
-                         'help': 'query used to filter messages to affect',
-                         'nargs': '*'}),
-                 ],
-                 help='display all headers')
+@register('toggleheaders', forced={'all_headers': 'toggle'},
+          arguments=[
+              (['query'], {
+                  'help': 'query used to filter messages to affect',
+                  'nargs': '*'}),
+          ],
+          help='display all headers')
 class ChangeDisplaymodeCommand(Command):
 
     """fold or unfold messages"""
@@ -603,7 +604,7 @@ class ChangeDisplaymodeCommand(Command):
         tbuffer.refresh()
 
 
-@registerCommand(MODE, 'pipeto', arguments=[
+@register('pipeto', arguments=[
     (['cmd'], {'help': 'shellcommand to pipe to', 'nargs': '+'}),
     (['--all'], {'action': 'store_true', 'help': 'pass all messages'}),
     (['--format'], {'help': 'output format', 'default': 'raw',
@@ -764,7 +765,7 @@ class PipeCommand(Command):
             ui.notify(self.done_msg)
 
 
-@registerCommand(MODE, 'remove', arguments=[
+@register('remove', arguments=[
     (['--all'], {'action': 'store_true', 'help': 'remove whole thread'})])
 class RemoveCommand(Command):
 
@@ -811,7 +812,7 @@ class RemoveCommand(Command):
         ui.apply_command(FlushCommand())
 
 
-@registerCommand(MODE, 'print', arguments=[
+@register('print', arguments=[
     (['--all'], {'action': 'store_true', 'help': 'print all messages'}),
     (['--raw'], {'action': 'store_true', 'help': 'pass raw mail string'}),
     (['--separately'], {'action': 'store_true',
@@ -860,7 +861,7 @@ class PrintCommand(PipeCommand):
                              done_msg=ok_msg, **kwargs)
 
 
-@registerCommand(MODE, 'save', arguments=[
+@register('save', arguments=[
     (['--all'], {'action': 'store_true', 'help': 'save all attachments'}),
     (['path'], {'nargs': '?', 'help': 'path to save to'})])
 class SaveAttachmentCommand(Command):
@@ -991,8 +992,8 @@ class OpenAttachmentCommand(Command):
             ui.notify('unknown mime type')
 
 
-@registerCommand(
-    MODE, 'move', help='move focus in current buffer',
+@register(
+    'move', help='move focus in current buffer',
     arguments=[
         (['movement'],
          {'nargs': argparse.REMAINDER,
@@ -1027,7 +1028,7 @@ class MoveFocusCommand(MoveCommand):
         tbuffer.body.refresh()
 
 
-@registerCommand(MODE, 'select')
+@register('select')
 class ThreadSelectCommand(Command):
 
     """select focussed element. The fired action depends on the focus:
@@ -1042,8 +1043,8 @@ class ThreadSelectCommand(Command):
             ui.apply_command(ChangeDisplaymodeCommand(visible='toggle'))
 
 
-@registerCommand(
-    MODE, 'tag', forced={'action': 'add'},
+@register(
+    'tag', forced={'action': 'add'},
     arguments=[
         (['--all'], {'action': 'store_true',
                      'help': 'tag all messages in thread'}),
@@ -1052,8 +1053,8 @@ class ThreadSelectCommand(Command):
         (['tags'], {'help': 'comma separated list of tags'})],
     help='add tags to message(s)',
 )
-@registerCommand(
-    MODE, 'retag', forced={'action': 'set'},
+@register(
+    'retag', forced={'action': 'set'},
     arguments=[
         (['--all'], {'action': 'store_true',
                      'help': 'tag all messages in thread'}),
@@ -1062,8 +1063,8 @@ class ThreadSelectCommand(Command):
         (['tags'], {'help': 'comma separated list of tags'})],
     help='set message(s) tags.',
 )
-@registerCommand(
-    MODE, 'untag', forced={'action': 'remove'},
+@register(
+    'untag', forced={'action': 'remove'},
     arguments=[
         (['--all'], {'action': 'store_true',
                      'help': 'tag all messages in thread'}),
@@ -1072,8 +1073,8 @@ class ThreadSelectCommand(Command):
         (['tags'], {'help': 'comma separated list of tags'})],
     help='remove tags from message(s)',
 )
-@registerCommand(
-    MODE, 'toggletags', forced={'action': 'toggle'},
+@register(
+    'toggletags', forced={'action': 'toggle'},
     arguments=[
         (['--all'], {'action': 'store_true',
                      'help': 'tag all messages in thread'}),
