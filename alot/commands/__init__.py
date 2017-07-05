@@ -12,6 +12,15 @@ import re
 from ..settings import settings
 from ..helper import split_commandstring, string_decode
 
+COMMANDS = {
+    'search': {},
+    'envelope': {},
+    'bufferlist': {},
+    'taglist': {},
+    'thread': {},
+    'global': {},
+}
+
 
 class Command(object):
 
@@ -33,15 +42,6 @@ class CommandCanceled(Exception):
     """ Exception triggered when an interactive command has been cancelled
     """
     pass
-
-COMMANDS = {
-    'search': {},
-    'envelope': {},
-    'bufferlist': {},
-    'taglist': {},
-    'thread': {},
-    'global': {},
-}
 
 
 def lookup_command(cmdname, mode):
