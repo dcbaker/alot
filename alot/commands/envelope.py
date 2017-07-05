@@ -15,7 +15,7 @@ import tempfile
 
 from twisted.internet.defer import inlineCallbacks
 
-from . import Command, registerCommand
+from . import Command, RegisterCommand
 from . import globals
 from .utils import set_encrypt
 from .. import buffers
@@ -29,7 +29,7 @@ from ..helper import string_decode
 from ..settings import settings
 from ..utils import argparse as cargparse
 
-register = partial(registerCommand, 'envelope')
+register = partial(RegisterCommand, 'envelope')
 
 
 @register(

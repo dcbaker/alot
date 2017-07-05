@@ -17,7 +17,7 @@ from functools import partial
 
 from twisted.internet.defer import inlineCallbacks
 
-from . import Command, registerCommand
+from . import Command, RegisterCommand
 from .globals import ExternalCommand
 from .globals import FlushCommand
 from .globals import ComposeCommand
@@ -39,7 +39,7 @@ from ..helper import email_as_string
 from ..utils import argparse as cargparse
 from ..widgets.globals import AttachmentWidget
 
-register = partial(registerCommand, 'thread')
+register = partial(RegisterCommand, 'thread')
 
 
 def determine_sender(mail, action='reply'):

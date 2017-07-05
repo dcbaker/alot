@@ -7,7 +7,7 @@ from functools import partial
 import argparse
 import logging
 
-from . import Command, registerCommand
+from . import Command, RegisterCommand
 from .globals import PromptCommand
 from .globals import MoveCommand
 from .. import commands
@@ -15,7 +15,7 @@ from .. import commands
 from .. import buffers
 from ..db.errors import DatabaseROError
 
-register = partial(registerCommand, 'search')
+register = partial(RegisterCommand, 'search')
 
 
 @register('select')

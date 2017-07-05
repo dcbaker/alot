@@ -4,10 +4,10 @@
 from __future__ import absolute_import
 from functools import partial
 
-from . import Command, registerCommand
+from . import Command, RegisterCommand
 from .globals import SearchCommand
 
-register = partial(registerCommand, 'taglist')
+register = partial(RegisterCommand, 'taglist')
 
 
 @register('select')

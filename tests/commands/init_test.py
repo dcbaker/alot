@@ -40,12 +40,12 @@ class TestCommandFactory(unittest.TestCase):
 
 
 class TestRegisterCommand(unittest.TestCase):
-    """Tests for the registerCommand class."""
+    """Tests for the RegisterCommand class."""
 
     def test_registered(self):
-        """using registerCommand adds to the COMMANDS dict."""
+        """using RegisterCommand adds to the COMMANDS dict."""
         with mock.patch('alot.commands.COMMANDS', {'foo': {}}):
-            @commands.registerCommand('foo', 'test')
+            @commands.RegisterCommand('foo', 'test')
             def foo():  # pylint: disable=unused-variable
                 pass
 

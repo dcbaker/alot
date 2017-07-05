@@ -4,10 +4,10 @@
 from __future__ import absolute_import
 from functools import partial
 
-from ..commands import Command, registerCommand
+from ..commands import Command, RegisterCommand
 from . import globals
 
-register = partial(registerCommand, 'bufferlist')
+register = partial(RegisterCommand, 'bufferlist')
 
 
 @register('open')

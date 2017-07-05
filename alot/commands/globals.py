@@ -19,7 +19,7 @@ import urwid
 from twisted.internet.defer import inlineCallbacks
 from twisted.internet import threads
 
-from . import Command, registerCommand
+from . import Command, RegisterCommand
 from . import CommandCanceled
 from .utils import set_encrypt
 from .. import commands
@@ -38,7 +38,7 @@ from ..db.envelope import Envelope
 from ..settings import settings
 from ..utils import argparse as cargparse
 
-register = partial(registerCommand, 'global')
+register = partial(RegisterCommand, 'global')
 
 
 @register('exit')

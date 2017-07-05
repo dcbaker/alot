@@ -8,7 +8,7 @@ User actions are represented by :class:`Command` objects that can then be trigge
 Command-line strings given by the user via the prompt or key bindings can be translated to
 :class:`Command` objects using :func:`alot.commands.commandfactory`.
 Specific actions are defined as subclasses of :class:`Command` and can be registered
-to a global command pool using the :class:`registerCommand` decorator.
+to a global command pool using the :class:`RegisterCommand` decorator.
 
 .. Note::
 
@@ -45,7 +45,7 @@ to a global command pool using the :class:`registerCommand` decorator.
 .. autofunction:: commandfactory
 .. autofunction:: lookup_command
 .. autofunction:: lookup_parser
-.. autoclass:: registerCommand
+.. autoclass:: RegisterCommand
 
 
 Globals

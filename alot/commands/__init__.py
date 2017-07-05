@@ -90,7 +90,7 @@ class CommandArgumentParser(argparse.ArgumentParser):
         raise CommandParseError(message)
 
 
-class registerCommand(object):
+class RegisterCommand(object):
 
     """
     Decorator used to register a :class:`Command` as
@@ -103,7 +103,7 @@ class registerCommand(object):
 
     .. code-block::
 
-        @registerCommand('thread', 'save', arguments=[
+        @RegisterCommand('thread', 'save', arguments=[
             (['--all'], {'action': 'store_true', 'help':'save all'}),
             (['path'], {'nargs':'?', 'help':'path to save to'})],
             help='save attachment(s)')
