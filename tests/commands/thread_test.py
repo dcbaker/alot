@@ -49,11 +49,13 @@ class TestClearMyAddress(unittest.TestCase):
 
     me1 = 'me@example.com'
     me2 = 'ME@example.com'
+    me3 = 'Mé@example.com'
     me_named = 'alot team <me@example.com>'
     you = 'you@example.com'
     named = 'somebody you know <somebody@example.com>'
     imposter = 'alot team <imposter@example.com>'
     mine = [me1, me2]
+    non_ascii = 'Öwe <oewe@example.com>'
 
     def test_empty_input_returns_empty_list(self):
         self.assertListEqual(
@@ -87,6 +89,12 @@ class TestClearMyAddress(unittest.TestCase):
     def test_real_name_is_never_considered(self):
         expected = [self.imposter]
         mine = 'alot team'
+        actual = thread.ReplyCommand.clear_my_address(mine, expected)
+        self.assertListEqual(actual, expected)
+
+    def test_non_ascii_name(self):
+        expected = [self.non_ascii]
+        mine = [self.me3]
         actual = thread.ReplyCommand.clear_my_address(mine, expected)
         self.assertListEqual(actual, expected)
 
